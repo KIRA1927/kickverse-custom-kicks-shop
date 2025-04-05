@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Use environment variables or fallback to empty strings
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://jqmdhzkdheltvtqjvkkx.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Check if credentials are available
