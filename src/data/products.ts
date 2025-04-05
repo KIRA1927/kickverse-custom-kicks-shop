@@ -133,7 +133,7 @@ export const getBrands = (): string[] => {
   return [...new Set(products.map(product => product.brand))];
 };
 
-// Add the missing getRelatedProducts function
+// Add the getRelatedProducts function
 export const getRelatedProducts = (category: string, currentProductId: string): Product[] => {
   return products
     .filter(product => 
