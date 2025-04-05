@@ -1,7 +1,7 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 interface CartItem {
@@ -38,7 +38,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Load cart items when user changes
   useEffect(() => {
     const loadCart = async () => {
-      if (user) {
+      if (user && isSupabaseConfigured()) {
         try {
           const { data, error } = await supabase
             .from('cart')
@@ -97,7 +97,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const updatedCartItems = [...cartItems];
         updatedCartItems[existingItemIndex].quantity += product.quantity;
 
-        if (user) {
+        if (user && isSupabaseConfigured()) {
           // Update in database if user is logged in
           const { error } = await supabase
             .from('cart')
@@ -115,7 +115,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...product
         };
 
-        if (user) {
+        if (user && isSupabaseConfigured()) {
           // Add to database if user is logged in
           const { error, data } = await supabase
             .from('cart')

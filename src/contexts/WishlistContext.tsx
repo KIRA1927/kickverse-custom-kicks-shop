@@ -1,7 +1,7 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 interface WishlistItem {
@@ -31,7 +31,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Load wishlist items from localStorage or database
   useEffect(() => {
     const loadWishlist = async () => {
-      if (user) {
+      if (user && isSupabaseConfigured()) {
         try {
           const { data, error } = await supabase
             .from('wishlist')
@@ -83,7 +83,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
 
-      if (user) {
+      if (user && isSupabaseConfigured()) {
         // Add to database if user is logged in
         const { error } = await supabase.from('wishlist').insert({
           user_id: user.id,
@@ -111,7 +111,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const removeFromWishlist = async (productId: string) => {
     try {
-      if (user) {
+      if (user && isSupabaseConfigured()) {
         // Remove from database if user is logged in
         const { error } = await supabase
           .from('wishlist')
