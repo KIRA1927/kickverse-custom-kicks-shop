@@ -132,3 +132,12 @@ export const getCategories = (): string[] => {
 export const getBrands = (): string[] => {
   return [...new Set(products.map(product => product.brand))];
 };
+
+// Add the missing getRelatedProducts function
+export const getRelatedProducts = (category: string, currentProductId: string): Product[] => {
+  return products
+    .filter(product => 
+      product.category === category && product.id !== currentProductId
+    )
+    .slice(0, 4); // Limit to 4 related products
+};
