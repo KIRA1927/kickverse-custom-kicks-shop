@@ -28,8 +28,7 @@ const mockSupabaseClient = {
       }),
       insert: () => Promise.resolve({ data: [], error: null }),
       delete: () => Promise.resolve({ error: null }),
-      order: () => Promise.resolve({ data: [], error: null }),
-      eq: () => Promise.resolve({ data: [], error: null }),
+      order: () => ({ data: [], error: null }),
     }),
     insert: () => ({
       select: () => Promise.resolve({ data: [], error: null }),

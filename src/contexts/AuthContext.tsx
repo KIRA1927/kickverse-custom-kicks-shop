@@ -3,6 +3,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { useToast } from '@/components/ui/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Get initial session
@@ -51,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Success",
         description: "Logged in successfully",
       });
+      navigate('/'); // Navigate to home page after login
     } catch (error: any) {
       toast({
         title: "Error",
@@ -63,12 +66,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            email_confirmed: true // Set email as confirmed directly
+          }
+        } 
+      });
       if (error) throw error;
+      
+      // Automatically sign in after sign up without verification
+      await signIn(email, password);
+      
       toast({
         title: "Success",
-        description: "Registration successful. Please check your email for verification.",
+        description: "Registration successful! You are now logged in.",
       });
+      navigate('/'); // Navigate to home page after registration
     } catch (error: any) {
       toast({
         title: "Error",
@@ -87,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Success",
         description: "Logged out successfully",
       });
+      navigate('/');
     } catch (error: any) {
       toast({
         title: "Error",
