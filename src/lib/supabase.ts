@@ -40,6 +40,14 @@ const mockSupabaseClient = {
       eq: () => Promise.resolve({ error: null }),
     }),
   }),
+  storage: {
+    from: () => ({
+      upload: () => Promise.resolve({ data: { path: '' }, error: null }),
+      getPublicUrl: () => ({ data: { publicUrl: '' } }),
+      list: () => Promise.resolve({ data: [], error: null }),
+      remove: () => Promise.resolve({ data: null, error: null }),
+    }),
+  },
   functions: {
     invoke: () => Promise.resolve({ data: { url: null }, error: null }),
   },
@@ -47,7 +55,13 @@ const mockSupabaseClient = {
 
 // Create and export the Supabase client, or fall back to mock client
 export const supabase = hasValidCredentials 
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: localStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+      }
+    })
   : mockSupabaseClient as any;
 
 // Function to check if Supabase is properly configured

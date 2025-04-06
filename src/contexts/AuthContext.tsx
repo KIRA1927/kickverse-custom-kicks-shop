@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { Session, User } from '@supabase/supabase-js';
 
 type User = {
   id: string;
@@ -10,6 +11,7 @@ type User = {
 
 type AuthContextType = {
   user: User | null;
+  session: Session | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -20,56 +22,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for current session
-    const checkUser = async () => {
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.warn("Failed to get session:", error.message);
-          return;
-        }
-        
-        if (data?.session?.user) {
-          setUser({
-            id: data.session.user.id,
-            email: data.session.user.email || '',
-          });
-        }
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-      } finally {
-        setIsLoading(false);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
       }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setIsLoading(false);
+    });
+
+    // Cleanup
+    return () => {
+      subscription.unsubscribe();
     };
-
-    checkUser();
-
-    // Listen for auth changes
-    try {
-      const { data } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-          });
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
-      });
-
-      // Cleanup
-      return () => {
-        data?.subscription?.unsubscribe();
-      };
-    } catch (error) {
-      console.error("Auth state change error:", error);
-      return () => {};
-    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -106,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, signIn, signUp, signOut, isLoading }}>
+    <AuthContext.Provider value={{ user, session, signIn, signUp, signOut, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

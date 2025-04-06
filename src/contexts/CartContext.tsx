@@ -23,6 +23,7 @@ type CartContextType = {
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
+  totalAmount: number; // Add totalAmount property
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -107,6 +108,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     0
   );
 
+  // Add totalAmount calculation (same as subtotal for now)
+  const totalAmount = subtotal;
+
   return (
     <CartContext.Provider value={{
       cartItems,
@@ -115,7 +119,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       removeFromCart,
       clearCart,
       totalItems,
-      subtotal
+      subtotal,
+      totalAmount
     }}>
       {children}
     </CartContext.Provider>
