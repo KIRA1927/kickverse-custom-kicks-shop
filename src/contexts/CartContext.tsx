@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
@@ -12,7 +13,6 @@ interface CartItem {
   image: string;
   size?: string;
   color?: string;
-  customColor?: string;
 }
 
 interface CartContextType {
@@ -89,8 +89,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const existingItemIndex = cartItems.findIndex(item => 
         item.productId === product.productId && 
         item.size === product.size && 
-        item.color === product.color &&
-        item.customColor === product.customColor
+        item.color === product.color
       );
 
       if (existingItemIndex > -1) {
@@ -129,7 +128,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               image: product.image,
               size: product.size,
               color: product.color,
-              custom_color: product.customColor
             })
             .select();
 
