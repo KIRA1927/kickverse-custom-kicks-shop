@@ -1,7 +1,4 @@
-
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,7 +17,7 @@ serve(async (req) => {
 
   try {
     // Get request body
-    const { cartItems, shippingFee, stripeKey } = await req.json();
+    const { cartItems, shippingFee } = await req.json();
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -57,12 +54,12 @@ serve(async (req) => {
     }
 
     // Create line items for Stripe checkout
-    const line_items = cartItems.map((item) => ({
+    const line_items = cartItems.map((item: any) => ({
       price_data: {
         currency: "usd",
         product_data: {
           name: item.name,
-          description: `Size: ${item.size}, Color: ${item.color || item.customColor || 'Default'}`,
+          description: `Size: ${item.size}, Color: ${item.color}`,
           images: [item.image],
         },
         unit_amount: Math.round(item.price * 100), // Stripe requires amount in cents

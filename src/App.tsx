@@ -15,27 +15,12 @@ import CheckoutPage from "./pages/CheckoutPage";
 import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
 import CustomizePage from "./pages/CustomizePage";
 import LoginPage from "./pages/LoginPage";
-import LogoutPage from "./pages/LogoutPage";
 import OrdersPage from "./pages/OrdersPage";
-import AboutPage from "./pages/AboutPage";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
-import { isSupabaseConfigured } from "./lib/supabase";
 
-// Create a new query client with error handling
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 30000,
-    },
-  },
-});
-
-// Log Supabase configuration status
-console.log("Supabase configured:", isSupabaseConfigured());
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -44,7 +29,7 @@ const App = () => (
         <CartProvider>
           <WishlistProvider>
             <Toaster />
-            <Sonner position="top-right" closeButton={true} />
+            <Sonner />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<HomePage />} />
@@ -57,10 +42,7 @@ const App = () => (
                 <Route path="/customize" element={<CustomizePage />} />
                 <Route path="/customize/:productId" element={<CustomizePage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/logout" element={<LogoutPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/tracking/:trackingNumber" element={<OrdersPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

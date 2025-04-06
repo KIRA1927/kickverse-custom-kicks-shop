@@ -1,8 +1,0 @@
-
-project_id = "jqmdhzkdheltvtqjvkkx"
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.super-service]
-verify_jwt = false

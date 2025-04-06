@@ -38,10 +38,9 @@ const Navbar = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
       setSearchTerm('');
       setIsSearchOpen(false);
-      setIsMenuOpen(false);
     }
   };
 
@@ -49,12 +48,10 @@ const Navbar = () => {
     const term = e.target.value;
     setSearchTerm(term);
 
-    if (term.length >= 1) {
+    if (term.length >= 2) {
       const results = products.filter(product =>
         product.name.toLowerCase().includes(term.toLowerCase()) ||
-        product.description.toLowerCase().includes(term.toLowerCase()) ||
-        product.category.toLowerCase().includes(term.toLowerCase()) ||
-        product.brand.toLowerCase().includes(term.toLowerCase())
+        product.description.toLowerCase().includes(term.toLowerCase())
       ).slice(0, 5);
       setSearchResults(results);
     } else {
@@ -62,31 +59,9 @@ const Navbar = () => {
     }
   };
 
-  const handleSearchItemClick = (productId: string) => {
-    setSearchTerm('');
-    setIsSearchOpen(false);
-    setIsMenuOpen(false);
-    navigate(`/product/${productId}`);
-  };
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-
-  // Close search results if clicked outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.search-container') && isSearchOpen) {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isSearchOpen]);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
@@ -116,7 +91,7 @@ const Navbar = () => {
           {/* Search, Cart, User - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Search */}
-            <div className="relative search-container">
+            <div className="relative">
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="p-2 text-gray-600 hover:text-purple-700 transition-colors"
@@ -141,10 +116,14 @@ const Navbar = () => {
                   {searchResults.length > 0 && (
                     <div className="mt-2 max-h-60 overflow-y-auto">
                       {searchResults.map((product) => (
-                        <div
+                        <Link
                           key={product.id}
-                          onClick={() => handleSearchItemClick(product.id)}
-                          className="flex items-center p-2 hover:bg-gray-100 rounded transition-colors cursor-pointer"
+                          to={`/product/${product.id}`}
+                          onClick={() => {
+                            setSearchTerm('');
+                            setIsSearchOpen(false);
+                          }}
+                          className="flex items-center p-2 hover:bg-gray-100 rounded transition-colors"
                         >
                           <img
                             src={product.image}
@@ -155,13 +134,8 @@ const Navbar = () => {
                             <p className="text-sm font-medium">{product.name}</p>
                             <p className="text-xs text-gray-500">${product.price}</p>
                           </div>
-                        </div>
+                        </Link>
                       ))}
-                    </div>
-                  )}
-                  {searchTerm && searchResults.length === 0 && (
-                    <div className="mt-2 p-2 text-center text-gray-500">
-                      No products found
                     </div>
                   )}
                 </div>
@@ -209,11 +183,9 @@ const Navbar = () => {
                     <Link to="/wishlist">Wishlist</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/logout">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
-                    </Link>
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -263,10 +235,14 @@ const Navbar = () => {
             {searchResults.length > 0 && (
               <div className="max-h-40 overflow-y-auto">
                 {searchResults.map((product) => (
-                  <div
+                  <Link
                     key={product.id}
-                    onClick={() => handleSearchItemClick(product.id)}
-                    className="flex items-center p-2 hover:bg-gray-100 rounded transition-colors cursor-pointer"
+                    to={`/product/${product.id}`}
+                    onClick={() => {
+                      setSearchTerm('');
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex items-center p-2 hover:bg-gray-100 rounded transition-colors"
                   >
                     <img
                       src={product.image}
@@ -277,7 +253,7 @@ const Navbar = () => {
                       <p className="text-sm font-medium">{product.name}</p>
                       <p className="text-xs text-gray-500">${product.price}</p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -311,10 +287,10 @@ const Navbar = () => {
                 <Link to="/orders" className="text-gray-700 hover:text-purple-700 transition-colors py-2" onClick={toggleMenu}>
                   Orders
                 </Link>
-                <Link to="/logout" className="text-gray-700 hover:text-purple-700 transition-colors py-2 flex items-center" onClick={toggleMenu}>
+                <Button variant="ghost" onClick={() => { signOut(); toggleMenu(); }} className="justify-start p-0 h-auto">
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
-                </Link>
+                </Button>
               </>
             ) : (
               <Link to="/login" className="text-gray-700 hover:text-purple-700 transition-colors py-2" onClick={toggleMenu}>
