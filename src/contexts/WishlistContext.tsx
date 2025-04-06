@@ -1,10 +1,8 @@
 
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-interface WishlistItem {
+type WishlistItem = {
   id: string;
   productId: string;
   name: string;
@@ -12,149 +10,80 @@ interface WishlistItem {
   image: string;
   size?: string;
   color?: string;
-}
+};
 
-interface WishlistContextType {
+type WishlistContextType = {
   wishlistItems: WishlistItem[];
-  addToWishlist: (product: WishlistItem) => Promise<void>;
-  removeFromWishlist: (productId: string) => Promise<void>;
-  clearWishlist: () => void;
+  addToWishlist: (item: WishlistItem) => void;
+  removeFromWishlist: (id: string) => void;
   isInWishlist: (productId: string) => boolean;
-}
+  clearWishlist: () => void;
+};
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
+const LOCAL_STORAGE_KEY = 'kickverse-wishlist';
+
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
-  const { user } = useAuth();
 
-  // Load wishlist items from localStorage or database
+  // Load wishlist from localStorage on initial render
   useEffect(() => {
-    const loadWishlist = async () => {
-      if (user && isSupabaseConfigured()) {
-        try {
-          const { data, error } = await supabase
-            .from('wishlist')
-            .select('*')
-            .eq('user_id', user.id);
-
-          if (error) {
-            throw error;
-          }
-
-          if (data) {
-            setWishlistItems(data);
-          }
-        } catch (error) {
-          console.error('Error loading wishlist:', error);
-          toast.error('Failed to load wishlist');
-          // Fallback to localStorage if database fails
-          const localWishlist = localStorage.getItem(`wishlist_${user.id}`);
-          if (localWishlist) {
-            setWishlistItems(JSON.parse(localWishlist));
-          }
-        }
-      } else {
-        // For non-authenticated users, use localStorage
-        const localWishlist = localStorage.getItem('guest_wishlist');
-        if (localWishlist) {
-          setWishlistItems(JSON.parse(localWishlist));
-        }
-      }
-    };
-
-    loadWishlist();
-  }, [user]);
-
-  // Save wishlist to localStorage whenever it changes
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem(`wishlist_${user.id}`, JSON.stringify(wishlistItems));
-    } else {
-      localStorage.setItem('guest_wishlist', JSON.stringify(wishlistItems));
-    }
-  }, [wishlistItems, user]);
-
-  const addToWishlist = async (product: WishlistItem) => {
     try {
-      // Check if item is already in wishlist
-      if (isInWishlist(product.productId)) {
-        toast.info('Product is already in your wishlist');
-        return;
+      const savedWishlist = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedWishlist) {
+        setWishlistItems(JSON.parse(savedWishlist));
       }
-
-      if (user && isSupabaseConfigured()) {
-        // Add to database if user is logged in
-        const { error } = await supabase.from('wishlist').insert({
-          user_id: user.id,
-          product_id: product.productId,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          size: product.size,
-          color: product.color,
-        });
-
-        if (error) {
-          throw error;
-        }
-      }
-
-      // Update state
-      setWishlistItems(prev => [...prev, product]);
-      toast.success('Added to wishlist');
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      toast.error('Failed to add to wishlist');
+      console.error('Failed to load wishlist from localStorage:', error);
     }
+  }, []);
+
+  // Save wishlist to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(wishlistItems));
+    } catch (error) {
+      console.error('Failed to save wishlist to localStorage:', error);
+    }
+  }, [wishlistItems]);
+
+  const addToWishlist = (item: WishlistItem) => {
+    // Check if item already exists in wishlist
+    if (isInWishlist(item.productId)) {
+      toast.info('This item is already in your wishlist');
+      return;
+    }
+    
+    setWishlistItems(prev => [...prev, item]);
+    toast.success('Added to your wishlist');
   };
 
-  const removeFromWishlist = async (productId: string) => {
-    try {
-      if (user && isSupabaseConfigured()) {
-        // Remove from database if user is logged in
-        const { error } = await supabase
-          .from('wishlist')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('product_id', productId);
-
-        if (error) {
-          throw error;
-        }
-      }
-
-      // Update state
-      setWishlistItems(prev => prev.filter(item => item.productId !== productId));
-      toast.success('Removed from wishlist');
-    } catch (error) {
-      console.error('Error removing from wishlist:', error);
-      toast.error('Failed to remove from wishlist');
-    }
-  };
-
-  const clearWishlist = () => {
-    setWishlistItems([]);
-    if (user) {
-      localStorage.removeItem(`wishlist_${user.id}`);
-    } else {
-      localStorage.removeItem('guest_wishlist');
-    }
+  const removeFromWishlist = (id: string) => {
+    setWishlistItems(prev => prev.filter(item => item.id !== id));
+    toast.success('Removed from your wishlist');
   };
 
   const isInWishlist = (productId: string) => {
     return wishlistItems.some(item => item.productId === productId);
   };
 
-  const value = {
-    wishlistItems,
-    addToWishlist,
-    removeFromWishlist,
-    clearWishlist,
-    isInWishlist,
+  const clearWishlist = () => {
+    setWishlistItems([]);
+    toast.success('Wishlist cleared');
   };
 
-  return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;
+  return (
+    <WishlistContext.Provider value={{
+      wishlistItems,
+      addToWishlist,
+      removeFromWishlist,
+      isInWishlist,
+      clearWishlist
+    }}>
+      {children}
+    </WishlistContext.Provider>
+  );
 };
 
 export const useWishlist = () => {

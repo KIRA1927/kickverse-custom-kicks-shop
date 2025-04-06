@@ -1,9 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Use environment variables or fallback to empty strings
+// Use environment variables or fallback to demo values for connection
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://jqmdhzkdheltvtqjvkkx.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxbWRoemtkaGVsdHZ0cWp2a2t4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4NTg5MTksImV4cCI6MjA1OTQzNDkxOX0.OdeQ_DiFmnJLubiIKZIJ04drX-NR52R4NJ2lcj38R_c';
 
 // Check if credentials are available
 const hasValidCredentials = !!supabaseUrl && !!supabaseAnonKey;
@@ -11,7 +11,7 @@ const hasValidCredentials = !!supabaseUrl && !!supabaseAnonKey;
 // Create a mock client for when credentials are not available
 const mockSupabaseClient = {
   auth: {
-    getSession: () => Promise.resolve({ data: { session: null } }),
+    getSession: () => Promise.resolve({ data: { session: null }, error: null }),
     onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
     signInWithPassword: () => Promise.resolve({ error: null }),
     signUp: () => Promise.resolve({ error: null }),
@@ -62,7 +62,6 @@ export const isSupabaseConfigured = (): boolean => {
 };
 
 // Add a console message at import time to make configuration status clear
-if (!hasValidCredentials) {
-  console.warn('Running in demo mode: Supabase credentials missing. App functionality will be limited.');
-  console.info('To connect to Supabase, provide VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
-}
+console.info(hasValidCredentials 
+  ? 'Supabase client initialized with provided credentials' 
+  : 'Running in demo mode with mock client - limited functionality available');
