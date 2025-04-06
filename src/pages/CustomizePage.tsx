@@ -1,17 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import ColorGrid from '@/components/ui/color-grid';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { getProductById, getCustomizableProducts } from '@/data/products';
 import Layout from '@/components/Layout/Layout';
 import { Product } from '@/types/product';
 import { toast } from '@/components/ui/use-toast';
+
+// Import our new components
+import ColorSelector from '@/components/customize/ColorSelector';
+import SizeSelector from '@/components/customize/SizeSelector';
+import ProductPreview from '@/components/customize/ProductPreview';
+import ProductSelector from '@/components/customize/ProductSelector';
 
 const CustomizePage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -22,19 +25,6 @@ const CustomizePage = () => {
   
   const [product, setProduct] = useState<Product | null>(null);
   const [customizableProducts, setCustomizableProducts] = useState<Product[]>([]);
-  
-  const colors = [
-    { name: 'White', value: 'white' },
-    { name: 'Black', value: 'black' },
-    { name: 'Red', value: 'red' },
-    { name: 'Blue', value: 'blue' },
-    { name: 'Green', value: 'green' },
-    { name: 'Yellow', value: 'yellow' },
-    { name: 'Purple', value: 'purple' },
-    { name: 'Orange', value: 'orange' },
-    { name: 'Pink', value: 'pink' },
-    { name: 'Gray', value: 'gray' }
-  ];
   
   useEffect(() => {
     if (productId) {
@@ -113,20 +103,7 @@ const CustomizePage = () => {
         </Button>
         
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="relative">
-            <div 
-              className="bg-gray-100 rounded-lg overflow-hidden aspect-square flex items-center justify-center"
-              style={{ backgroundColor: selectedColor || 'white' }}
-            >
-              {product && (
-                <img 
-                  src={product.image} 
-                  alt={product.name} 
-                  className="object-contain h-full w-full mix-blend-multiply"
-                />
-              )}
-            </div>
-          </div>
+          <ProductPreview product={product} selectedColor={selectedColor} />
           
           <div>
             <h1 className="text-3xl font-bold mb-2">
@@ -134,27 +111,11 @@ const CustomizePage = () => {
             </h1>
             
             {!productId && customizableProducts.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold mb-3">Select Product</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  {customizableProducts.map((item) => (
-                    <Card 
-                      key={item.id}
-                      className={`cursor-pointer transition ${product?.id === item.id ? 'ring-2 ring-purple-500' : ''}`}
-                      onClick={() => setProduct(item)}
-                    >
-                      <CardContent className="p-4">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          className="h-32 object-contain mx-auto mb-2"
-                        />
-                        <h3 className="text-sm font-medium text-center">{item.name}</h3>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
+              <ProductSelector
+                products={customizableProducts}
+                selectedProduct={product}
+                onProductSelect={setProduct}
+              />
             )}
             
             <Tabs defaultValue="color">
@@ -164,48 +125,19 @@ const CustomizePage = () => {
               </TabsList>
               
               <TabsContent value="color">
-                <div className="grid grid-cols-5 gap-2">
-                  {colors.map((color) => (
-                    <div key={color.value} className="text-center">
-                      <button
-                        className={`w-12 h-12 rounded-full ${
-                          selectedColor === color.value 
-                            ? 'ring-2 ring-offset-2 ring-purple-600' 
-                            : 'ring-1 ring-gray-300'
-                        }`}
-                        style={{ backgroundColor: color.value }}
-                        onClick={() => handleColorSelect(color.value)}
-                        aria-label={`Select ${color.name} color`}
-                      />
-                      <p className="mt-1 text-xs">{color.name}</p>
-                    </div>
-                  ))}
-                </div>
+                <ColorSelector
+                  selectedColor={selectedColor}
+                  onColorSelect={handleColorSelect}
+                />
               </TabsContent>
               
               <TabsContent value="size">
                 {product && (
-                  <RadioGroup 
-                    value={selectedSize || ""} 
-                    onValueChange={handleSizeSelect}
-                    className="grid grid-cols-3 gap-2"
-                  >
-                    {product.sizes.map((size) => (
-                      <div key={size}>
-                        <RadioGroupItem
-                          value={size}
-                          id={`size-${size}`}
-                          className="peer sr-only"
-                        />
-                        <Label
-                          htmlFor={`size-${size}`}
-                          className="flex h-12 items-center justify-center rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-900 peer-data-[state=checked]:border-purple-600 peer-data-[state=checked]:bg-purple-50 peer-data-[state=checked]:text-purple-600 cursor-pointer"
-                        >
-                          {size}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
+                  <SizeSelector
+                    sizes={product.sizes}
+                    selectedSize={selectedSize}
+                    onSizeSelect={handleSizeSelect}
+                  />
                 )}
               </TabsContent>
             </Tabs>
