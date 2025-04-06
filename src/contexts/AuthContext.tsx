@@ -2,15 +2,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
-type User = {
+type AuthUser = {
   id: string;
   email: string;
 };
 
 type AuthContextType = {
-  user: User | null;
+  user: AuthUser | null;
   session: Session | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -21,7 +21,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,14 +30,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         setSession(newSession);
-        setUser(newSession?.user ?? null);
+        setUser(newSession?.user ? {
+          id: newSession.user.id,
+          email: newSession.user.email || ''
+        } : null);
       }
     );
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      setUser(currentSession?.user ? {
+        id: currentSession.user.id,
+        email: currentSession.user.email || ''
+      } : null);
       setIsLoading(false);
     });
 

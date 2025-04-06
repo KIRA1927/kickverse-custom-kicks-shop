@@ -21,8 +21,21 @@ import AboutPage from "./pages/AboutPage";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
+import { isSupabaseConfigured } from "./lib/supabase";
 
-const queryClient = new QueryClient();
+// Create a new query client with error handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30000,
+    },
+  },
+});
+
+// Log Supabase configuration status
+console.log("Supabase configured:", isSupabaseConfigured());
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -31,7 +44,7 @@ const App = () => (
         <CartProvider>
           <WishlistProvider>
             <Toaster />
-            <Sonner />
+            <Sonner position="top-right" closeButton={true} />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<HomePage />} />

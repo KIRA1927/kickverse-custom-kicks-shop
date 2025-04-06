@@ -70,7 +70,7 @@ export const isSupabaseConfigured = (): boolean => {
     console.log('Supabase is configured with valid credentials');
     return true;
   } else {
-    console.log('Supabase is NOT configured with valid credentials. Using mock client.');
+    console.warn('Supabase is NOT configured with valid credentials. Using mock client.');
     return false;
   }
 };
