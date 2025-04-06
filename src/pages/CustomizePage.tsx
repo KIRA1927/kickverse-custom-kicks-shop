@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ColorGrid } from '@/components/ui/color-grid';
+import ColorGrid from '@/components/ui/color-grid';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
@@ -23,7 +23,6 @@ const CustomizePage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [customizableProducts, setCustomizableProducts] = useState<Product[]>([]);
   
-  // Available colors for customization
   const colors = [
     { name: 'White', value: 'white' },
     { name: 'Black', value: 'black' },
@@ -38,7 +37,6 @@ const CustomizePage = () => {
   ];
   
   useEffect(() => {
-    // If a productId is provided, get that specific product
     if (productId) {
       const foundProduct = getProductById(productId);
       if (foundProduct && foundProduct.isCustomizable) {
@@ -47,11 +45,9 @@ const CustomizePage = () => {
         navigate('/customize');
       }
     } else {
-      // Otherwise, get the list of customizable products
       const customizable = getCustomizableProducts();
       setCustomizableProducts(customizable);
       
-      // Set the first product as default if we have any
       if (customizable.length > 0) {
         setProduct(customizable[0]);
       }
@@ -78,10 +74,13 @@ const CustomizePage = () => {
     }
     
     addToCart({
-      ...product,
-      customColor: selectedColor || 'white',
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      quantity: 1,
       size: selectedSize,
-      quantity: 1
+      customColor: selectedColor || 'white'
     });
     
     toast({
@@ -114,7 +113,6 @@ const CustomizePage = () => {
         </Button>
         
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Product Visualization */}
           <div className="relative">
             <div 
               className="bg-gray-100 rounded-lg overflow-hidden aspect-square flex items-center justify-center"
@@ -130,7 +128,6 @@ const CustomizePage = () => {
             </div>
           </div>
           
-          {/* Customization Controls */}
           <div>
             <h1 className="text-3xl font-bold mb-2">
               {product ? `Customize ${product.name}` : 'Choose a Product to Customize'}
