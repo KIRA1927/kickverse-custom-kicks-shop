@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Authentication not configured. Please connect to Supabase.",
         variant: "destructive",
       });
       throw error;

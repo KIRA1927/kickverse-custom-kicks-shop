@@ -1,13 +1,15 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Use environment variables or fallback to empty strings
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Use environment variables or fallback to demo values
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://demo.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'demo-key';
 
-// Check if credentials are available
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase credentials missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+// Check if real credentials are available
+const hasRealCredentials = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+if (!hasRealCredentials) {
+  console.warn('Supabase not configured. Using demo mode. Connect to Supabase for full functionality.');
 }
 
 // Create and export the Supabase client
@@ -15,5 +17,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Function to check if Supabase is properly configured
 export const isSupabaseConfigured = (): boolean => {
-  return !!supabaseUrl && !!supabaseAnonKey;
+  return hasRealCredentials;
 };
