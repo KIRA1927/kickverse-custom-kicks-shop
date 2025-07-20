@@ -16,6 +16,8 @@ import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
 import CustomizePage from "./pages/CustomizePage";
 import LoginPage from "./pages/LoginPage";
 import SearchPage from "./pages/SearchPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import OrdersPage from "./pages/OrdersPage";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -44,6 +46,8 @@ const App = () => (
                 <Route path="/customize/:productId" element={<CustomizePage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
