@@ -15,6 +15,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
 import CustomizePage from "./pages/CustomizePage";
 import LoginPage from "./pages/LoginPage";
+import SearchPage from "./pages/SearchPage";
 import OrdersPage from "./pages/OrdersPage";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
                 <Route path="/customize" element={<CustomizePage />} />
                 <Route path="/customize/:productId" element={<CustomizePage />} />
+                <Route path="/search" element={<SearchPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="*" element={<NotFound />} />
